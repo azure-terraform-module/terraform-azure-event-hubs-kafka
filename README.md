@@ -126,5 +126,8 @@ module "eventhub" {
 
   subnet_ids = data.terraform_remote_state.vnet.outputs.subnet_ids 
   vnet_ids = [data.terraform_remote_state.vnet.outputs.vnet_id]
+
+  capacity = 1 
+  partition_count = 2
 }
 ```
