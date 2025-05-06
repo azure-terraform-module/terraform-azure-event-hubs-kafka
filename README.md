@@ -6,6 +6,11 @@ Currently, the module only supports for Premium SKU.
 
 # Key Features 
 
+- Supports private, service, and public network modes with automatic configuration.
+- Auto-creation of Private Endpoints and optional Private DNS Zones for seamless VNet integration.
+- Dynamic network rulesets (VNet and IP-based) generated based on selected network mode.
+- DNS zone linking for multiple VNets if needed.
+
 variables.tf file 
 ```
 ######################################
