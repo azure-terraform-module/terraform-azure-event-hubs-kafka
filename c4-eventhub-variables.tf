@@ -7,9 +7,9 @@ variable "eventhub_name" {
 }
 
 variable "capacity" {
-  description = "The capacity of the Event Hub namespace (1, 2, or 3)"
+  description = "Numbet of PUs for the Event Hub Namespace."
   type        = number
-  default     = 1 
+  default     = 1
 }
 
 variable "partition_count" {
@@ -19,13 +19,8 @@ variable "partition_count" {
 }
 
 variable "eventhub_network_mode" {
-  description = "Network mode for Event Hub: 'private' or 'service'"
+  description = "Network mode for Event Hub: private, service, public."
   type        = string
-  default     = "private"
-  validation {
-    condition     = contains(["private", "service", "public"], var.eventhub_network_mode)
-    error_message = "eventhub_network_mode must be either 'private' or 'service' or 'public'"
-  }
 }
 
 ######################################
@@ -33,8 +28,8 @@ variable "eventhub_network_mode" {
 ######################################
 variable "eventhub_private_dns_zone_id" {
   description = "The resource ID of the private DNS zone for Event Hub."
-  type        = string
-  default = ""
+  type        = list(string)
+  default     = []
 }
 
 variable "subnet_ids" {
@@ -44,14 +39,14 @@ variable "subnet_ids" {
 }
 
 variable "ip_rules" {
-  description = "The IP rules for the Event Hub namespace."
+  description = "CIDR blocks to allow access to the Event Hub - Only for service endpoints."
   type        = list(string)
   default     = []
 }
 
-variable "vnet_id" {
-  description = "The resource ID of the virtual network."
-  type        = string
+variable "vnet_ids" {
+  description = "List of VNet IDs used for linking to Private DNS Zone - Only for private endpoints."
+  type        = list(string)
 }
 
 

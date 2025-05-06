@@ -1,6 +1,6 @@
 # Create private DNS zone if not provided - Private endpoint 
 resource "azurerm_private_dns_zone" "private_dns_eventhub" {
-  count               = var.eventhub_private_dns_zone_id == null && local.is_private ? 1 : 0
+  count               = var.eventhub_private_dns_zone_id == "" && local.is_private ? 1 : 0
   name                = "privatelink.servicebus.windows.net"
   resource_group_name = var.resource_group_name
   tags                = var.tags
@@ -8,11 +8,14 @@ resource "azurerm_private_dns_zone" "private_dns_eventhub" {
 
 # Create private DNS zone link - Private endpoint
 resource "azurerm_private_dns_zone_virtual_network_link" "eventhub_private_dns_zone_link" {
-  count                 = var.eventhub_private_dns_zone_id == null && local.is_private ? 1 : 0
-  name                  = "${var.eventhub_name}-dns-link"
+  for_each = var.eventhub_private_dns_zone_id == "" && local.is_private ? {
+    for vnet_id in var.vnet_ids : vnet_id => vnet_id
+  } : {}
+
+  name                  = "${var.eventhub_name}-dns-link-${each.key}"
   private_dns_zone_name = azurerm_private_dns_zone.private_dns_eventhub[0].name
   resource_group_name   = azurerm_private_dns_zone.private_dns_eventhub[0].resource_group_name
-  virtual_network_id    = var.vnet_id
+  virtual_network_id    = each.value
   tags                  = var.tags
 }
 
@@ -41,8 +44,9 @@ resource "azurerm_private_endpoint" "eventhub_private_endpoint" {
   tags = var.tags
 }
 
+# Event Hub Namespace
 resource "azurerm_eventhub_namespace" "eventhub_namespace" {
-  name                          = "${var.eventhub_name}"
+  name                          = var.eventhub_name
   location                      = var.location
   resource_group_name           = var.resource_group_name
   sku                           = "Premium"
@@ -66,8 +70,9 @@ resource "azurerm_eventhub_namespace" "eventhub_namespace" {
   }
 }
 
+# Event Hub
 resource "azurerm_eventhub" "eventhub" {
-  name              = "${var.eventhub_name}"
+  name              = var.eventhub_name
   namespace_id      = azurerm_eventhub_namespace.eventhub_namespace.id
   partition_count   = var.partition_count
   message_retention = 90
