@@ -14,11 +14,15 @@ resource "azurerm_private_dns_zone_virtual_network_link" "eventhub_private_dns_z
       : toset([])
   )
  
-  name                  = "${var.eventhub_name}-dns-link-${each.key}"
+  name                  = "${var.eventhub_name}-dns-link-${basename(each.key)}"
   private_dns_zone_name = azurerm_private_dns_zone.private_dns_eventhub[0].name
   resource_group_name   = azurerm_private_dns_zone.private_dns_eventhub[0].resource_group_name
   virtual_network_id    = each.value
   tags                  = var.tags
+
+  depends_on = [
+    azurerm_private_dns_zone.private_dns_eventhub
+  ]
 }
 
 # Create private endpoint - Private endpoint
