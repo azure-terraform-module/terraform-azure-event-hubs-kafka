@@ -1,6 +1,6 @@
 # Create private DNS zone if not provided - Private endpoint 
 resource "azurerm_private_dns_zone" "private_dns_eventhub" {
-  count               = var.eventhub_private_dns_zone_id == "" && local.is_private ? 1 : 0
+  count               = local.is_private && length(var.eventhub_private_dns_zone_id) == 0 ? 1 : 0
   name                = "privatelink.servicebus.windows.net"
   resource_group_name = var.resource_group_name
   tags                = var.tags
@@ -8,10 +8,10 @@ resource "azurerm_private_dns_zone" "private_dns_eventhub" {
 
 # Create private DNS zone link - Private endpoint
 resource "azurerm_private_dns_zone_virtual_network_link" "eventhub_private_dns_zone_link" {
-  for_each = var.eventhub_private_dns_zone_id == "" && local.is_private ? {
-    for vnet_id in var.vnet_ids : vnet_id => vnet_id
-  } : {}
-
+  for_each = local.is_private && length(var.eventhub_private_dns_zone_id) == 0 
+    ? { for vnet_id in var.vnet_ids : vnet_id => vnet_id }
+    : {}
+ 
   name                  = "${var.eventhub_name}-dns-link-${each.key}"
   private_dns_zone_name = azurerm_private_dns_zone.private_dns_eventhub[0].name
   resource_group_name   = azurerm_private_dns_zone.private_dns_eventhub[0].resource_group_name
