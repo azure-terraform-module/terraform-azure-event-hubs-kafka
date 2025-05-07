@@ -1,7 +1,7 @@
 # Create private DNS zone if not provided - Private endpoint 
 resource "azurerm_private_dns_zone" "private_dns_eventhub" {
   count               = local.is_private && length(var.eventhub_private_dns_zone_id) == 0 ? 1 : 0
-  name                = "privatelink.eventhubs.windows.net"
+  name                = "privatelink.servicebus.windows.net"
   resource_group_name = var.resource_group_name
   tags                = var.tags
 }
