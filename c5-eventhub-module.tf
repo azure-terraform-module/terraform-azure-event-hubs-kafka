@@ -8,7 +8,7 @@ resource "azurerm_private_dns_zone" "private_dns_eventhub" {
 
 # Create private DNS zone link - Private endpoint
 resource "azurerm_private_dns_zone_virtual_network_link" "eventhub_private_dns_zone_link" {
-  for_each = local.is_private && length(var.eventhub_private_dns_zone_id) == 0 ? toset(var.subnet_ids) : []
+  for_each = local.is_private && length(var.eventhub_private_dns_zone_id) == 0 ? toset(var.vnet_ids) : []
  
   name                  = "${var.eventhub_name}-dns-link-${each.key}"
   private_dns_zone_name = azurerm_private_dns_zone.private_dns_eventhub[0].name
@@ -26,7 +26,7 @@ resource "azurerm_private_endpoint" "eventhub_private_endpoint" {
   subnet_id           = each.key
 
   private_service_connection {
-    name                           = "${var.eventhub_name}-private-connection"
+    name                           = "${var.eventhub_name}-private-connection-${local.subnet_info[each.key].name}"
     private_connection_resource_id = azurerm_eventhub_namespace.eventhub_namespace.id
     is_manual_connection           = false
     subresource_names              = ["namespace"]
@@ -74,6 +74,7 @@ resource "azurerm_eventhub" "eventhub" {
   namespace_id      = azurerm_eventhub_namespace.eventhub_namespace.id
   partition_count   = var.partition_count
   message_retention = 90
+  tags             = var.tags
 }
 
 
