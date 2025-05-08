@@ -47,6 +47,7 @@ variable "ip_rules" {
 variable "vnet_ids" {
   description = "List of VNet IDs used for linking to Private DNS Zone - Only for private endpoints."
   type        = list(string)
+  default = []
 }
  
  
