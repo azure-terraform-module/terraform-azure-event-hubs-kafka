@@ -3,19 +3,19 @@ output "namespace_name" {
   value       = azurerm_eventhub_namespace.eventhub_namespace.name
 }
  
+output "namespace" {
+  description = "The name of the Event Hub Namespace"
+  value       = azurerm_eventhub_namespace.eventhub_namespace.name
+}
+ 
 output "namespace_id" {
   description = "The ID of the Event Hub Namespace"
   value       = azurerm_eventhub_namespace.eventhub_namespace.id
 }
- 
-output "name" {
-  description = "The name of the Event Hub"
-  value       = azurerm_eventhub.eventhub.name
-}
- 
-output "id" {
-  description = "The ID of the Event Hub"
-  value       = azurerm_eventhub.eventhub.id
+
+output "topics" {
+  description = "The list of topics in the Event Hub Namespace"
+  value       = azurerm_eventhub_namespace.eventhub_namespace.eventhub_names
 }
  
 output "hostname" {

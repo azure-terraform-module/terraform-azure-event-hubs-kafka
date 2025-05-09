@@ -1,9 +1,15 @@
 ######################################
 ##              EVENTHUB            ##
 ######################################
-variable "eventhub_name" {
+variable "eventhub_namespace" {
   description = "The name of the Event Hub."
   type        = string
+}
+
+variable "topics" {
+  description = "The list of topics in the Event Hub Namespace."
+  type        = list(string)
+  default     = []
 }
  
 variable "capacity" {
@@ -13,7 +19,7 @@ variable "capacity" {
 }
  
 variable "partition_count" {
-  description = "The number of partitions for the Event Hub."
+  description = "The number of partitions for the Event Hub (topics)."
   type        = number
   default     = 1
 }

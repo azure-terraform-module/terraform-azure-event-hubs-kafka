@@ -39,7 +39,7 @@ variable "tags" {
 ######################################
 ##              EVENTHUB            ##
 ######################################
-variable "eventhub_name" {
+variable "eventhub_namespace" {
   description = "The name of the Event Hub."
   type        = string
   default     = "eventhub-terraform"
@@ -119,7 +119,7 @@ module "eventhub" {
 
   resource_group_name = var.resource_group_name
   location           = var.location
-  eventhub_name      = var.eventhub_name 
+  eventhub_namespace      = var.eventhub_namespace 
 
   tags = var.tags 
   eventhub_network_mode = "private" # private, service, public
@@ -129,5 +129,10 @@ module "eventhub" {
 
   capacity = 1 
   partition_count = 2
+  
+  topics = [
+    "topic1",
+    "topic2"
+  ]
 }
 ```
