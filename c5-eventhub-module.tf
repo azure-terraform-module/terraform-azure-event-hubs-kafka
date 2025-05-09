@@ -14,7 +14,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "eventhub_private_dns_z
     : toset([])
   )
  
-  name                  = "${var.eventhub_name}-dns-link-${basename(each.key)}"
+  name                  = "${var.eventhub_namespace}-dns-link-${basename(each.key)}"
   private_dns_zone_name = azurerm_private_dns_zone.private_dns_eventhub[0].name
   resource_group_name   = azurerm_private_dns_zone.private_dns_eventhub[0].resource_group_name
   virtual_network_id    = each.value
@@ -31,13 +31,13 @@ resource "azurerm_private_endpoint" "eventhub_private_endpoint" {
     ? toset(var.subnet_ids)
     : toset([])
   )
-  name                = "${var.eventhub_name}-private-endpoint-${local.subnet_info[each.key].name}"
+  name                = "${var.eventhub_namespace}-private-endpoint-${local.subnet_info[each.key].name}"
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = each.key
  
   private_service_connection {
-    name                           = "${var.eventhub_name}-private-connection-${local.subnet_info[each.key].name}"
+    name                           = "${var.eventhub_namespace}-private-connection-${local.subnet_info[each.key].name}"
     private_connection_resource_id = azurerm_eventhub_namespace.eventhub_namespace.id
     is_manual_connection           = false
     subresource_names              = ["namespace"]
@@ -59,7 +59,7 @@ resource "azurerm_private_endpoint" "eventhub_private_endpoint" {
  
 # Event Hub Namespace
 resource "azurerm_eventhub_namespace" "eventhub_namespace" {
-  name                          = var.eventhub_name
+  name                          = var.eventhub_namespace
   location                      = var.location
   resource_group_name           = var.resource_group_name
   sku                           = "Premium"
@@ -85,7 +85,8 @@ resource "azurerm_eventhub_namespace" "eventhub_namespace" {
  
 # Event Hub
 resource "azurerm_eventhub" "eventhub" {
-  name              = var.eventhub_name
+  for_each = toset(var.topics)
+  name              = each.key
   namespace_id      = azurerm_eventhub_namespace.eventhub_namespace.id
   partition_count   = var.partition_count
   message_retention = 90
