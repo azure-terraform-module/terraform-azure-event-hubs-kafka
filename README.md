@@ -38,10 +38,6 @@ Specify how the Event Hub should be exposed:
 ### 2.3 Example
 #### main.tf
 ```hcl
-provider "azurerm" {
-  features {}
-}
-
 module "eventhub" {
   source  = "github.com/<your-org>/terraform-azurerm-eventhub"
   
