@@ -38,7 +38,7 @@ resource "azurerm_private_endpoint" "eventhub_private_endpoint" {
  
   private_service_connection {
     name                           = "${var.namespace}-private-connection-${local.subnet_info[each.key].name}"
-    private_connection_resource_id = azurerm_eventhub_namespace.namespace.id
+    private_connection_resource_id = azurerm_eventhub_namespace.eventhub_namespace.id
     is_manual_connection           = false
     subresource_names              = ["namespace"]
   }
@@ -85,9 +85,9 @@ resource "azurerm_eventhub_namespace" "eventhub_namespace" {
  
 # Event Hub
 resource "azurerm_eventhub" "eventhub" {
-  for_each = toset(var.topics)
+  for_each          = toset(var.topics)
   name              = each.key
-  namespace_id      = azurerm_eventhub_namespace.namespace.id
+  namespace_id      = azurerm_eventhub_namespace.eventhub_namespace.id
   partition_count   = var.partition_count
   message_retention = 90
 }
