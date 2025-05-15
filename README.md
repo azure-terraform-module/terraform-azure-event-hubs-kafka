@@ -139,7 +139,7 @@ provider "azurerm" {
 
 #### outputs.tf
 ```hcl
-output "namespace_name" {
+output "namespace" {
   description = "The name of the Event Hub Namespace"
   value       = module.eventhub.namespace
 }
