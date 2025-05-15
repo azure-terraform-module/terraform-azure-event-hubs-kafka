@@ -25,8 +25,11 @@ variable "partition_count" {
 }
  
 variable "network_mode" {
-  description = "Network mode for Event Hub: private, service, public."
-  type        = string
+  type = string
+  validation {
+    condition     = contains(["private","service","public"], var.network_mode)
+    error_message = "network_mode must be one of private, service, or public"
+  }
 }
  
 ######################################

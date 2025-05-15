@@ -13,7 +13,7 @@ Ensure that you have the following:
 - Terraform `>= 1.3`
 - AzureRM Provider `~> 4.25.0`
 - Proper permissions in your Azure subscription to create Event Hub, DNS zones, VNets, and Private Endpoints.
-### 2.2. `eventhub_network_mode`
+### 2.2. `network_mode`
 Specify how the Event Hub should be exposed:
 - `private`: Uses Private Endpoint and Private DNS Zones (no public access).
 - `service`: Uses Service Endpoints and IP/VNet rules.
@@ -67,6 +67,11 @@ module "eventhub" {
     environment = "dev"
     project     = "eventhub-provisioning"
   }
+
+  topics = [
+    "topic1",
+    "topic2"
+  ]
 }
 ```
 
