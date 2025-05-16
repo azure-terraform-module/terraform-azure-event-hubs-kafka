@@ -7,9 +7,9 @@ locals {
   }
  
   # Endpoint types
-  is_private = var.eventhub_network_mode == "private" # Private endpoint - Traffic in VNet 
-  is_service = var.eventhub_network_mode == "service" # Service endpoint - Traffic in Azure backbone 
-  is_public  = var.eventhub_network_mode == "public"  # Public endpoint  - Traffic over the internet
+  is_private = var.network_mode == "private" # Private endpoint - Traffic in VNet 
+  is_service = var.network_mode == "service" # Service endpoint - Traffic in Azure backbone 
+  is_public  = var.network_mode == "public"  # Public endpoint  - Traffic over the internet
  
   # Public network access - Service endpoints, Public endpoints
   public_network_access = local.is_service || local.is_public ? true : false
@@ -17,7 +17,7 @@ locals {
  
   # Create private DNS zone if not provided - Private endpoint
   private_dns_zone_ids = local.is_private ? (
-    length(var.eventhub_private_dns_zone_ids) > 0 ? var.eventhub_private_dns_zone_ids : [
+    length(var.private_dns_zone_ids) > 0 ? var.private_dns_zone_ids : [
       azurerm_private_dns_zone.private_dns_eventhub[0].id
     ]
   ) : []

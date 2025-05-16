@@ -1,9 +1,15 @@
 ######################################
 ##              EVENTHUB            ##
 ######################################
-variable "eventhub_name" {
+variable "namespace" {
   description = "The name of the Event Hub."
   type        = string
+}
+
+variable "topics" {
+  description = "The list of topics in the Event Hub Namespace."
+  type        = list(string)
+  default     = []
 }
  
 variable "capacity" {
@@ -13,20 +19,23 @@ variable "capacity" {
 }
  
 variable "partition_count" {
-  description = "The number of partitions for the Event Hub."
+  description = "The number of partitions for the Event Hub (topics)."
   type        = number
   default     = 1
 }
  
-variable "eventhub_network_mode" {
-  description = "Network mode for Event Hub: private, service, public."
-  type        = string
+variable "network_mode" {
+  type = string
+  validation {
+    condition     = contains(["private","service","public"], var.network_mode)
+    error_message = "network_mode must be one of private, service, or public"
+  }
 }
  
 ######################################
 ##              NETWORK             ##
 ######################################
-variable "eventhub_private_dns_zone_ids" {
+variable "private_dns_zone_ids" {
   description = "The resource ID of the private DNS zone for Event Hub."
   type        = list(string)
   default     = []
