@@ -34,7 +34,7 @@ Specify how the Event Hub should be exposed:
 | `partition_count`      | `number`       | ❌        | `1`                    | The number of partitions for each Event Hub (topic).                        |
 | `network_mode`         | `string`       | ✅        | —                      | Network mode for Event Hub: `private`, `service`, `public`.                 |
 | `private_dns_zone_ids` | `list(string)` | ❌        | `[]`                   | The resource ID of the private DNS zone for Event Hub.                      |
-| `subnet_ids`           | `list(string)` | ❌        | `[]`                   | The resource ID of the subnet for the private endpoint.                     |
+| `subnet_ids`           | `list(string)` | ❌        | `[]`                   | The resource ID of the subnet.                     |
 | `ip_rules`             | `list(string)` | ❌        | `[]`                   | CIDR blocks to allow access (only for service endpoints).                   |
 | `vnet_ids`             | `list(string)` | ❌        | `[]`                   | VNet IDs used for linking to Private DNS Zone (only for private endpoints). |
 | `resource_group_name`  | `string`       | ❌        | `"terraform-eventhub"` | The name of the resource group where the resources will be created.         |
@@ -46,9 +46,10 @@ Specify how the Event Hub should be exposed:
  
 | `network_mode`       | `private_dns_zone_ids` | `subnet_ids` | `vnet_ids` | `ip_rules` |
 | -------------------- | ---------------------- | ------------ | ---------- | ---------- |
-| **Private Endpoint** | 🟦                     | ✅            | ✅          | ❌          |
-| **Service Endpoint** | ❌                      | ✅            | ❌          | 🟦         |
-| **Public Endpoint**  | ❌                      | ❌            | ❌          | ❌          |
+| **Private Endpoint** | 🟦                     | ✅ (At least 1)          | ✅         | ❌         |
+| **Service Endpoint** | ❌                     | ✅           | ❌         | 🟦         |
+| **Public Endpoint**  | ❌                     | ❌           | ❌         | ❌         |
+
 ##### Notes:
 - ✅ = **Required** 
 - ❌ = **Not required**
@@ -56,6 +57,7 @@ Specify how the Event Hub should be exposed:
 
 #### main.tf 
 Network mode - Private
+- When use private mode, variable `subnet_ids` is where the ip of private endpoint will be created. So you just need at least one subnet id, all the subnets in the vnet will be conect to event hub.
 ```hcl
 module "eventhub" {
   source  = "github.com/<your-org>/terraform-azurerm-eventhub"
@@ -91,6 +93,7 @@ module "eventhub" {
 ```
 
 Network mode - Service
+- When use service mode, subnet_ids is what subnet can access the event hub. So you need to add the subnet id that you want to access the event hub.
 ```hcl
 module "eventhub" {
   source  = "github.com/<your-org>/terraform-azurerm-eventhub"
