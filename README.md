@@ -1,7 +1,7 @@
 # terraform-azurerm-eventhub
-
+ 
 This Terraform module provisions an **Azure Event Hub** namespace and its associated resources with support for **private**, **service**, and **public** network modes.
-
+ 
 ## 1. Features
 - Support for **private**, **service**, and **public** access modes.
 - Automatic provisioning of **private DNS zones** and **virtual network links** if not provided.
@@ -16,8 +16,14 @@ Ensure that you have the following:
 ### 2.2. `network_mode`
 Specify how the Event Hub should be exposed:
 - `private`: Uses Private Endpoint and Private DNS Zones (no public access).
+
+  ![Alt text](./images/1.png)
 - `service`: Uses Service Endpoints and IP/VNet rules.
+
+	![Alt text](./images/2.png)
 - `public`: Open to public internet access 
+
+	![Alt text](./images/3.png)
 ### 2.3. Input Variables
 
 | Name                   | Type           | Required | Default                | Description                                                                 |
@@ -35,35 +41,48 @@ Specify how the Event Hub should be exposed:
 | `location`             | `string`       | ✅        | —                      | The Azure location where the resources will be created.                     |
 | `tags`                 | `map(string)`  | ❌        | `{}`                   | Tags to assign to the resources.                                            |
 
-### 2.3 Example
-#### main.tf
+### 2.4 Example
+### Variable require by `network mode`
+ 
+| `network_mode`       | `private_dns_zone_ids` | `subnet_ids` | `vnet_ids` | `ip_rules` |
+| -------------------- | ---------------------- | ------------ | ---------- | ---------- |
+| **Private Endpoint** | 🟦                     | ✅            | ✅          | ❌          |
+| **Service Endpoint** | ❌                      | ✅            | ❌          | 🟦         |
+| **Public Endpoint**  | ❌                      | ❌            | ❌          | ❌          |
+##### Notes:
+- ✅ = **Required** 
+- ❌ = **Not required**
+- 🟦 = **Optional**
+
+#### main.tf 
+Network mode - Private
 ```hcl
 module "eventhub" {
   source  = "github.com/<your-org>/terraform-azurerm-eventhub"
-  
   # Required variables
-  namespace         = "my-eventhub" # Must be unique name
+  namespace         = "my-eventhub-private-mode" # Must be unique name
   resource_group_name   = "my-rg"
   location              = "eastus"
   network_mode = "private"
-
-  # Optional: for private or service mode
+ 
   subnet_ids = [
-    "/subscriptions/xxx/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet/subnets/subnet1"
+	"/subscriptions/xxx/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet/subnets/subnet1"
   ]
-
-  # Optional: for service mode
+ 
   vnet_ids = [
-    "/subscriptions/xxx/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet"
+	"/subscriptions/xxx/resourceGroups/my rg/providers/Microsoft.Network/virtualNetworks/my-vnet"
   ]
 
-  ip_rules = ["203.0.113.10"] # Optional: Allow list ip, only for service node
-
+  # Optional variables
+  private_dns_zone_ids = [
+    "/subscriptions/xxx/resourceGroups/my-rg/providers/Microsoft.Network/privateDnsZones/my-private-dns-zone"
+  ]
+ 
   tags = {
     environment = "dev"
     project     = "eventhub-provisioning"
   }
-
+ 
   topics = [
     "topic1",
     "topic2"
@@ -71,6 +90,58 @@ module "eventhub" {
 }
 ```
 
+Network mode - Service
+```hcl
+module "eventhub" {
+  source  = "github.com/<your-org>/terraform-azurerm-eventhub"
+  # Required variables
+  namespace         = "my-eventhub-service-mode" 
+  resource_group_name   = "my-rg"
+  location              = "eastus"
+  network_mode = "private"
+ 
+  subnet_ids = [
+    "/subscriptions/xxx/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet/subnets/subnet1"
+  ]
+ 
+  # Optional variables
+  ip_rules = [
+    "203.0.113.10"
+  ]
+ 
+  tags = {
+    environment = "dev"
+    project     = "eventhub-provisioning"
+  }
+ 
+  topics = [
+    "topic1",
+    "topic2"
+  ]
+}
+```
+
+Network mode - Public
+```hcl
+module "eventhub" {
+  source  = "github.com/<your-org>/terraform-azurerm-eventhub"
+  # Required variables
+  namespace         = "my-eventhub-public-mode"
+  resource_group_name   = "my-rg"
+  location              = "eastus"
+  network_mode = "public"
+ 
+  tags = {
+    environment = "dev"
+    project     = "eventhub-provisioning"
+  }
+ 
+  topics = [
+    "topic1",
+    "topic2"
+  ]
+}
+```
 
 #### provider.tf 
 ```hcl
