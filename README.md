@@ -101,7 +101,7 @@ module "eventhub" {
   namespace         = "my-eventhub-service-mode" 
   resource_group_name   = "my-rg"
   location              = "eastus"
-  network_mode = "private"
+  network_mode = "Service"
  
   subnet_ids = [
     "/subscriptions/xxx/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet/subnets/subnet1"
