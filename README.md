@@ -60,7 +60,9 @@ Network mode - Private
 - When use private mode, variable `subnet_ids` is where the ip of private endpoint will be created. So you just need at least one subnet id, all the subnets in the vnet will be conect to event hub.
 ```hcl
 module "eventhub" {
-  source  = "github.com/<your-org>/terraform-azurerm-eventhub"
+  source  = "azure-terraform-module/event-hubs-kafka/azure"
+  version = "0.0.3"
+
   # Required variables
   namespace         = "my-eventhub-private-mode" # Must be unique name
   resource_group_name   = "my-rg"
