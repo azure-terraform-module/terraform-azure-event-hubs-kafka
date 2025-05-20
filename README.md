@@ -17,13 +17,13 @@ Ensure that you have the following:
 Specify how the Event Hub should be exposed:
 - `private`: Uses Private Endpoint and Private DNS Zones (no public access).
 
-  ![Alt text](./images/1.png)
+  ![Alt text](https://raw.githubusercontent.com/azure-terraform-module/terraform-azure-event-hubs-kafka/refs/heads/master/images/1.png)
 - `service`: Uses Service Endpoints and IP/VNet rules.
 
-	![Alt text](./images/2.png)
+	![Alt text](https://raw.githubusercontent.com/azure-terraform-module/terraform-azure-event-hubs-kafka/refs/heads/master/images/2.png)
 - `public`: Open to public internet access 
 
-	![Alt text](./images/3.png)
+	![Alt text](https://raw.githubusercontent.com/azure-terraform-module/terraform-azure-event-hubs-kafka/refs/heads/master/images/3.png)
 ### 2.3. Input Variables
 
 | Name                   | Type           | Required | Default                | Description                                                                 |
