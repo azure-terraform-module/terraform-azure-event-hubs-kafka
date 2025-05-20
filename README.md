@@ -98,7 +98,9 @@ Network mode - Service
 - When use service mode, subnet_ids is what subnet can access the event hub. So you need to add the subnet id that you want to access the event hub.
 ```hcl
 module "eventhub" {
-  source  = "github.com/<your-org>/terraform-azurerm-eventhub"
+  source  = "azure-terraform-module/event-hubs-kafka/azure"
+  version = "0.0.3"
+
   # Required variables
   namespace         = "my-eventhub-service-mode" 
   resource_group_name   = "my-rg"
@@ -129,8 +131,9 @@ module "eventhub" {
 Network mode - Public
 ```hcl
 module "eventhub" {
-  source  = "github.com/<your-org>/terraform-azurerm-eventhub"
-  # Required variables
+  source  = "azure-terraform-module/event-hubs-kafka/azure"
+  version = "0.0.3"
+
   namespace         = "my-eventhub-public-mode"
   resource_group_name   = "my-rg"
   location              = "eastus"
