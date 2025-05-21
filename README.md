@@ -17,13 +17,13 @@ Ensure that you have the following:
 Specify how the Event Hub should be exposed:
 - `private`: Uses Private Endpoint and Private DNS Zones (no public access).
 
-  ![Alt text](./images/1.png)
+  ![Alt text](https://raw.githubusercontent.com/azure-terraform-module/terraform-azure-event-hubs-kafka/refs/heads/master/images/1.png)
 - `service`: Uses Service Endpoints and IP/VNet rules.
 
-	![Alt text](./images/2.png)
+	![Alt text](https://raw.githubusercontent.com/azure-terraform-module/terraform-azure-event-hubs-kafka/refs/heads/master/images/2.png)
 - `public`: Open to public internet access 
 
-	![Alt text](./images/3.png)
+	![Alt text](https://raw.githubusercontent.com/azure-terraform-module/terraform-azure-event-hubs-kafka/refs/heads/master/images/3.png)
 ### 2.3. Input Variables
 
 | Name                   | Type           | Required | Default                | Description                                                                 |
@@ -60,7 +60,9 @@ Network mode - Private
 - When use private mode, variable `subnet_ids` is where the ip of private endpoint will be created. So you just need at least one subnet id, all the subnets in the vnet will be conect to event hub.
 ```hcl
 module "eventhub" {
-  source  = "github.com/<your-org>/terraform-azurerm-eventhub"
+  source  = "azure-terraform-module/event-hubs-kafka/azure"
+  version = "0.0.3"
+
   # Required variables
   namespace         = "my-eventhub-private-mode" # Must be unique name
   resource_group_name   = "my-rg"
@@ -96,7 +98,9 @@ Network mode - Service
 - When use service mode, subnet_ids is what subnet can access the event hub. So you need to add the subnet id that you want to access the event hub.
 ```hcl
 module "eventhub" {
-  source  = "github.com/<your-org>/terraform-azurerm-eventhub"
+  source  = "azure-terraform-module/event-hubs-kafka/azure"
+  version = "0.0.3"
+
   # Required variables
   namespace         = "my-eventhub-service-mode" 
   resource_group_name   = "my-rg"
@@ -127,8 +131,9 @@ module "eventhub" {
 Network mode - Public
 ```hcl
 module "eventhub" {
-  source  = "github.com/<your-org>/terraform-azurerm-eventhub"
-  # Required variables
+  source  = "azure-terraform-module/event-hubs-kafka/azure"
+  version = "0.0.3"
+
   namespace         = "my-eventhub-public-mode"
   resource_group_name   = "my-rg"
   location              = "eastus"
