@@ -89,5 +89,5 @@ resource "azurerm_eventhub" "eventhub" {
   name              = each.key
   namespace_id      = azurerm_eventhub_namespace.eventhub_namespace.id
   partition_count   = var.partition_count
-  message_retention = 90
+  message_retention = 7
 }
