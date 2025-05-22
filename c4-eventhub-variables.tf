@@ -5,7 +5,7 @@ variable "namespace" {
   description = "The name of the Event Hub."
   type        = string
 }
-
+ 
 variable "topics" {
   description = "The list of topics in the Event Hub Namespace."
   type        = list(string)
@@ -27,9 +27,15 @@ variable "partition_count" {
 variable "network_mode" {
   type = string
   validation {
-    condition     = contains(["private","service","public"], var.network_mode)
+    condition     = contains(["private", "service", "public"], var.network_mode)
     error_message = "network_mode must be one of private, service, or public"
   }
+}
+ 
+variable "sku" {
+  description = "The SKU of the Event Hub Namespace."
+  type        = string
+  default     = "Premium"
 }
  
 ######################################
@@ -56,7 +62,5 @@ variable "ip_rules" {
 variable "vnet_ids" {
   description = "List of VNet IDs used for linking to Private DNS Zone - Only for private endpoints."
   type        = list(string)
-  default = []
+  default     = []
 }
- 
- 
