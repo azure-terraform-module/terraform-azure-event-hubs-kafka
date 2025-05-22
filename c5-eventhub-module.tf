@@ -62,7 +62,7 @@ resource "azurerm_eventhub_namespace" "eventhub_namespace" {
   name                          = var.namespace
   location                      = var.location
   resource_group_name           = var.resource_group_name
-  sku                           = "Premium"
+  sku                           = var.sku
   capacity                      = var.capacity
   tags                          = var.tags
   public_network_access_enabled = local.public_network_access
