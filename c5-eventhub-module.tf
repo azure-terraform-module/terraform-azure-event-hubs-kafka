@@ -45,7 +45,7 @@ resource "azurerm_private_endpoint" "eventhub_private_endpoint" {
     for_each = length(local.private_dns_zone_ids) > 0 ? [1] : []
     content {
       name                 = "default"
-      private_dns_zone_ids = local.eventhub_private_dns_zone_ids
+      private_dns_zone_ids = local.private_dns_zone_ids
     }
   }
  
