@@ -72,6 +72,8 @@ resource "azurerm_eventhub_namespace" "eventhub_namespace" {
      content {
       default_action                 = network_rulesets.value.default_action
       public_network_access_enabled  = network_rulesets.value.public_network_access_enabled
+      virtual_network_rule = network_rulesets.value.virtual_network_rule
+      trusted_service_access_enabled = network_rulesets.value.trusted_service_access_enabled
     }
   }
  
