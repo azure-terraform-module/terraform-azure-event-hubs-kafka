@@ -42,10 +42,10 @@ resource "azurerm_private_endpoint" "eventhub_private_endpoint" {
   }
  
   dynamic "private_dns_zone_group" {
-    for_each = local.private_dns_zone_ids != null && length(local.private_dns_zone_ids) > 0 ? [1] : []
+    for_each = length(local.private_dns_zone_ids) > 0 ? [1] : []
     content {
       name                 = "default"
-      private_dns_zone_ids = local.private_dns_zone_ids
+      private_dns_zone_ids = local.eventhub_private_dns_zone_ids
     }
   }
  
@@ -68,13 +68,12 @@ resource "azurerm_eventhub_namespace" "eventhub_namespace" {
   public_network_access_enabled = local.public_network_access
  
   dynamic "network_rulesets" {
-    for_each = length(local.network_rulesets) > 0 ? local.network_rulesets : []
-    content {
+    for_each = var.sku == "Premium" ? local.network_rulesets : []
+     content {
       default_action                 = network_rulesets.value.default_action
       trusted_service_access_enabled = network_rulesets.value.trusted_service_access_enabled
       public_network_access_enabled  = network_rulesets.value.public_network_access_enabled
       virtual_network_rule           = network_rulesets.value.virtual_network_rule
-      ip_rule                        = network_rulesets.value.ip_rule
     }
   }
  
@@ -82,12 +81,12 @@ resource "azurerm_eventhub_namespace" "eventhub_namespace" {
     type = "SystemAssigned"
   }
 }
- 
-# Event Hub
-resource "azurerm_eventhub" "eventhub" {
-  for_each          = toset(var.topics)
-  name              = each.key
-  namespace_id      = azurerm_eventhub_namespace.eventhub_namespace.id
-  partition_count   = var.partition_count
-  message_retention = 7
+
+# Event Hub Topic 
+resource "azurerm_eventhub" "eventhub_topic" {
+  for_each     = { for t in var.topics : t.name => t }
+  name         = each.value.name
+  namespace_id = azurerm_eventhub_namespace.eventhub_namespace.id
+  partition_count          = lookup(each.value, "partition_count", 2)
+  message_retention = lookup(each.value, "message_retention", 7)
 }
