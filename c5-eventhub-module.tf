@@ -68,7 +68,7 @@ resource "azurerm_eventhub_namespace" "eventhub_namespace" {
   public_network_access_enabled = local.public_network_access
  
   dynamic "network_rulesets" {
-    for_each = var.sku == "Premium" ? local.network_rulesets : []
+    for_each = var.sku != "Basic" ? local.network_rulesets : []
      content {
       default_action                 = network_rulesets.value.default_action
       trusted_service_access_enabled = network_rulesets.value.trusted_service_access_enabled

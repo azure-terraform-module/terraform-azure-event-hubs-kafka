@@ -10,8 +10,8 @@ variable "topics" {
   description = "The list of topics in the Event Hub Namespace."
   type        = list(object({
     name = string
-    partition_count = number
-    message_retention = number
+    partition_count = optional(number)
+    message_retention = optional(number) 
   }))
   default     = []
 }
@@ -23,12 +23,12 @@ variable "capacity" {
 }
 
 variable "network_mode" {
-  description = "Network mode for Service bus private, service, public."
+  description = "Network mode for Event Hubs: private, service, or public."
   type        = string
   default     = "public"
   validation {
-    condition = var.sku != "Premium" && contains(["private", "service"], var.network_mode) ? false : true
-    error_message = "Network mode private and service are only supported for Premium SKU."
+    condition     = !(var.sku == "Basic" && contains(["private", "service"], var.network_mode))
+    error_message = "Network modes 'private' and 'service' are not supported for Basic SKU. Use Standard or Premium."
   }
   validation {
     condition     = contains(["public", "private", "service"], var.network_mode)

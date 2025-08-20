@@ -64,6 +64,8 @@ module "eventhub" {
   resource_group_name  = "my-rg"
   location             = "eastus"
   network_mode         = "private"
+  sku                = "Premium" 
+
   subnet_ids = [
     "/subscriptions/xxx/resourcegroups/my-rg/providers/microsoft.network/virtualnetworks/my-vnet/subnets/subnet1"
   ]
@@ -98,7 +100,8 @@ module "eventhub" {
   resource_group_name  = "my-rg"
   location             = "eastus"
   network_mode         = "service"
-  sku                  = "Premium"
+  # Standard or Premium are supported for service mode
+  sku                  = "Standard"
   subnet_ids = [
     "/subscriptions/xxx/resourcegroups/my-rg/providers/microsoft.network/virtualnetworks/my-vnet/subnets/subnet1"
   ]
@@ -123,6 +126,7 @@ module "eventhub" {
   resource_group_name  = "my-rg"
   location             = "eastus"
   network_mode         = "public"
+  sku                  = "Standard"
   tags = {
     environment = "dev"
     project     = "eventhub-provisioning"
