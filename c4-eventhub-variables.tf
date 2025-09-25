@@ -8,7 +8,11 @@ variable "namespace" {
  
 variable "topics" {
   description = "The list of topics in the Event Hub Namespace."
-  type        = list(string)
+  type        = list(object({
+    name = string
+    partition_count = optional(number)
+    message_retention = optional(number) 
+  }))
   default     = []
 }
  
@@ -17,18 +21,18 @@ variable "capacity" {
   type        = number
   default     = 1
 }
- 
-variable "partition_count" {
-  description = "The number of partitions for the Event Hub (topics)."
-  type        = number
-  default     = 1
-}
- 
+
 variable "network_mode" {
-  type = string
+  description = "Network mode for Event Hubs: private, service, or public."
+  type        = string
+  default     = "public"
   validation {
-    condition     = contains(["private", "service", "public"], var.network_mode)
-    error_message = "network_mode must be one of private, service, or public"
+    condition     = !(var.sku == "Basic" && contains(["private", "service"], var.network_mode))
+    error_message = "Network modes 'private' and 'service' are not supported for Basic SKU. Use Standard or Premium."
+  }
+  validation {
+    condition     = contains(["public", "private", "service"], var.network_mode)
+    error_message = "network_mode must be one of: public, private, service."
   }
 }
  
@@ -49,12 +53,6 @@ variable "private_dns_zone_ids" {
  
 variable "subnet_ids" {
   description = "The resource ID of the subnet for the private endpoint."
-  type        = list(string)
-  default     = []
-}
- 
-variable "ip_rules" {
-  description = "CIDR blocks to allow access to the Event Hub - Only for service endpoints."
   type        = list(string)
   default     = []
 }
