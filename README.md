@@ -3,7 +3,7 @@ this terraform module provisions an **azure event hub** namespace and its associ
 ## 1. features
 - support for **private**, **service**, and **public** access modes.
 - automatic provisioning of **private dns zones** and **virtual network links** if not provided.
-- configurable **ip rules** and **vnet rules** for service endpoint mode.
+- configurable **vnet rules** for service endpoint mode (applies when `sku = "Premium"`).
 - supports tagging, resource grouping, and subnet customization.
 ## 2. module usage
 ### 2.1. prerequisites
@@ -26,27 +26,25 @@ specify how the event hub should be exposed:
  
 | name                   | type           | required | default                | description                                                                 |
 | ---------------------- | -------------- | -------- | ---------------------- | --------------------------------------------------------------------------- |
-| `namespace`            | `string`       | ✅        | —                      | the name of the event hub.                                                  |
-| `topics`               | `list(string)` | ❌        | `[]`                   | the list of topics in the event hub namespace.                              |
+| `namespace`            | `string`       | ✅        | —                      | the name of the event hub namespace.                                        |
+| `topics`               | `list(object({ name = string, partition_count = optional(number), message_retention = optional(number) }))` | ❌ | `[]` | event hubs to create. per-hub overrides (defaults: 2 partitions, 7 days). |
 | `capacity`             | `number`       | ❌        | `1`                    | number of pus for the event hub namespace.                                  |
-| `partition_count`      | `number`       | ❌        | `1`                    | the number of partitions for each event hub (topic).                        |
 | `network_mode`         | `string`       | ✅        | —                      | network mode for event hub: `private`, `service`, `public`.                 |
 | `private_dns_zone_ids` | `list(string)` | ❌        | `[]`                   | the resource id of the private dns zone for event hub.                      |
-| `subnet_ids`           | `list(string)` | ❌        | `[]`                   | the resource id of the subnet.                     |
-| `ip_rules`             | `list(string)` | ❌        | `[]`                   | cidr blocks to allow access (only for service endpoints).                   |
+| `subnet_ids`           | `list(string)` | ❌        | `[]`                   | the resource id of the subnet.                                             |
 | `vnet_ids`             | `list(string)` | ❌        | `[]`                   | vnet ids used for linking to private dns zone (only for private endpoints). |
 | `resource_group_name`  | `string`       | ❌        | `"terraform-eventhub"` | the name of the resource group where the resources will be created.         |
 | `location`             | `string`       | ✅        | —                      | the azure location where the resources will be created.                     |
 | `tags`                 | `map(string)`  | ❌        | `{}`                   | tags to assign to the resources.                                            |
-| `sku`                | `string`       | ❌        | `"Premium"`           | the sku of the event hub namespace.                                         |
+| `sku`                  | `string`       | ❌        | `"Premium"`           | the sku of the event hub namespace.                                         |
  
 ### 2.4 example
 ### variable require by `network mode`
-| `network_mode`       | `private_dns_zone_ids` | `subnet_ids` | `vnet_ids` | `ip_rules` |
-| -------------------- | ---------------------- | ------------ | ---------- | ---------- |
-| **private endpoint** | 🟦                     | ✅ (at least 1)          | ✅         | ❌         |
-| **service endpoint** | ❌                     | ✅           | ❌         | 🟦         |
-| **public endpoint**  | ❌                     | ❌           | ❌         | ❌         |
+| `network_mode`       | `private_dns_zone_ids` | `subnet_ids` | `vnet_ids` |
+| -------------------- | ---------------------- | ------------ | ---------- |
+| **private endpoint** | 🟦                     | ✅ (at least 1) | ✅         |
+| **service endpoint** | ❌                     | ✅           | ❌         |
+| **public endpoint**  | ❌                     | ❌           | ❌         |
  
 ##### notes:
 - ✅ = **required** 
@@ -55,19 +53,21 @@ specify how the event hub should be exposed:
  
 #### main.tf 
 network mode - private
-- when use private mode, variable `subnet_ids` is where the ip of private endpoint will be created. so you just need at least one subnet id, all the subnets in the vnet will be conect to event hub.
+- when using private mode, `subnet_ids` is where the private endpoint ip will be created. you need at least one subnet id. if `private_dns_zone_ids` are not provided, a private dns zone and vnet links will be created and associated.
 ```hcl
 module "eventhub" {
   source  = "azure-terraform-module/event-hubs-kafka/azure"
   version = "0.0.3"
  
   # required variables
-  namespace         = "my-eventhub-private-mode" # must be unique name
-  resource_group_name   = "my-rg"
-  location              = "eastus"
-  network_mode = "private"
+  namespace            = "my-eventhub-private-mode" # must be unique name
+  resource_group_name  = "my-rg"
+  location             = "eastus"
+  network_mode         = "private"
+  sku                = "Premium" 
+
   subnet_ids = [
-	"/subscriptions/xxx/resourcegroups/my-rg/providers/microsoft.network/virtualnetworks/my-vnet/subnets/subnet1"
+    "/subscriptions/xxx/resourcegroups/my-rg/providers/microsoft.network/virtualnetworks/my-vnet/subnets/subnet1"
   ]
   vnet_ids = [
 	"/subscriptions/xxx/resourcegroups/my rg/providers/microsoft.network/virtualnetworks/my-vnet"
@@ -82,38 +82,36 @@ module "eventhub" {
     project     = "eventhub-provisioning"
   }
   topics = [
-    "topic1",
-    "topic2"
+    { name = "topic1", partition_count = 4, message_retention = 7 },
+    { name = "topic2" } # defaults: 2 partitions, 7 days
   ]
 }
 ```
  
 network mode - service
-- when use service mode, subnet_ids is what subnet can access the event hub. so you need to add the subnet id that you want to access the event hub.
+- when using service mode, `subnet_ids` define which subnets can access the namespace via service endpoints. network rules are applied when `sku = "Premium"`.
 ```hcl
 module "eventhub" {
   source  = "azure-terraform-module/event-hubs-kafka/azure"
   version = "0.0.3"
  
   # required variables
-  namespace         = "my-eventhub-service-mode" 
-  resource_group_name   = "my-rg"
-  location              = "eastus"
-  network_mode = "service"
+  namespace            = "my-eventhub-service-mode" 
+  resource_group_name  = "my-rg"
+  location             = "eastus"
+  network_mode         = "service"
+  # Standard or Premium are supported for service mode
+  sku                  = "Standard"
   subnet_ids = [
     "/subscriptions/xxx/resourcegroups/my-rg/providers/microsoft.network/virtualnetworks/my-vnet/subnets/subnet1"
-  ]
-  # optional variables
-  ip_rules = [
-    "203.0.113.10"
   ]
   tags = {
     environment = "dev"
     project     = "eventhub-provisioning"
   }
   topics = [
-    "topic1",
-    "topic2"
+    { name = "topic1" },
+    { name = "topic2", partition_count = 8 }
   ]
 }
 ```
@@ -124,17 +122,18 @@ module "eventhub" {
   source  = "azure-terraform-module/event-hubs-kafka/azure"
   version = "0.0.3"
  
-  namespace         = "my-eventhub-public-mode"
-  resource_group_name   = "my-rg"
-  location              = "eastus"
-  network_mode = "public"
+  namespace            = "my-eventhub-public-mode"
+  resource_group_name  = "my-rg"
+  location             = "eastus"
+  network_mode         = "public"
+  sku                  = "Standard"
   tags = {
     environment = "dev"
     project     = "eventhub-provisioning"
   }
   topics = [
-    "topic1",
-    "topic2"
+    { name = "topic1" },
+    { name = "topic2" }
   ]
 }
 ```
@@ -165,25 +164,45 @@ provider "azurerm" {
 }
 ```
  
-#### outputs.tf
+#### outputs.tf 
 ```hcl
 output "namespace" {
   description = "the name of the event hub namespace"
   value       = module.eventhub.namespace
 }
- 
+
 output "namespace_id" {
   description = "the id of the event hub namespace"
   value       = module.eventhub.namespace_id
-}  
- 
-output "topics" {
-  description = "list of event hub topics from the module"
-  value       = module.eventhub.topics
 }
- 
+
 output "hostname" {
   description = "the hostname of the event hub namespace"
   value       = module.eventhub.hostname
 }
-`
+
+output "eventhub_names" {
+  description = "names of event hubs (topics) created"
+  value       = module.eventhub.eventhub_names
+}
+
+output "eventhubs" {
+  description = "map of event hub name to event hub id"
+  value       = module.eventhub.eventhubs
+}
+
+output "private_endpoint_ids" {
+  description = "ids of private endpoints created (empty if not using private mode)"
+  value       = module.eventhub.private_endpoint_ids
+}
+
+output "private_dns_zone_ids" {
+  description = "private dns zone ids associated (created or provided)"
+  value       = module.eventhub.private_dns_zone_ids
+}
+
+output "vnet_link_ids" {
+  description = "ids of vnet links to the private dns zone (empty if not using private mode)"
+  value       = module.eventhub.vnet_link_ids
+}
+```
