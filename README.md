@@ -9,7 +9,7 @@ this terraform module provisions an **azure event hub** namespace and its associ
 ### 2.1. prerequisites
 ensure that you have the following:
 - terraform `>= 1.3`
-- azurerm provider `~> 4.25.0`
+- azurerm provider `~> 5.0`
 - proper permissions in your azure subscription to create event hub, dns zones, vnets, and private endpoints.
 ### 2.2. `network_mode`
 specify how the event hub should be exposed:
@@ -145,7 +145,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "4.25.0"
+      version = "~> 5.0"
     }
   }
   backend "azurerm" {
